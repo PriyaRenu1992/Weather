@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>London Weather</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="London Weather">
+  <meta property="og:title" content="London Weather">
+  <meta property="og:description" content="London Weather">
+</head>
+
+<body>
+  <h1>Weather Data for London</h1>
+  <div>
+    <label for="option">Choose an option:</label>
+    <select id="option" onchange="handleOptionChange()">
+      <option value="1">Get weather</option>
+      <option value="2">Get Wind Speed</option>
+      <option value="3">Get Pressure</option>
+      <option value="0">Exit</option>
+    </select>
+  </div>
+  <div id="dateInput">
+    <div id="dateLabel">
+      <label for="date">Enter the date (YYYY-MM-DD):</label>
+      <input type="text" id="date" />
+    </div>
+    <button onclick="getWeatherData()">Submit</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    async function fetchWeatherData() {
+      try {
+        const response = await fetch('http://localhost:3000/weather');
+        const data = await response.json();
+        return data.list;
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
+    }
+
+    function handleOptionChange() {
+      const selectedOption = document.getElementById('option').value;
+      const dateInputDiv = document.getElementById('dateLabel');
+
+
+      dateInputDiv.style.display = selectedOption === '0' ? 'none' : 'block';
+    }
+
+    async function getWeatherData() {
+
+
+      const weatherData = await fetchWeatherData();
+      if (!weatherData) {
+
+        return;
+      }
+      const option = document.getElementById('option').value;
+      const date = document.getElementById('date').value;
+
+      let resultText = '';
+      console.log(resultText)
+      if (option === '1') {
+        resultText = printWeatherForDate(date, weatherData);
+      } else if (option === '2') {
+        resultText = printWindSpeedForDate(date, weatherData);
+      } else if (option === '3') {
+        resultText = printPressureForDate(date, weatherData);
+      } else if (option === '0') {
+        resultText = 'Exiting the program.';
+      } else {
+        resultText = 'Invalid option. Please choose a valid option.';
+      }
+
+      const outputDiv = document.getElementById('output');
+      outputDiv.innerText = resultText;
+    }
+
+    function printWeatherForDate(date, weatherData) {
+      const dataForDate = weatherData.find(item => item.dt_txt.includes(date));
+      if (dataForDate) {
+        return `Temperature on ${date}: ${dataForDate.main.temp}`;
+      } else {
+        return 'No data available for the selected date.';
+      }
+    }
+
+    function printWindSpeedForDate(date, weatherData) {
+      const dataForDate = weatherData.find(item => item.dt_txt.includes(date));
+      if (dataForDate) {
+        return `Wind Speed on ${date}: ${dataForDate.wind.speed}`;
+      } else {
+        return 'No data available for the selected date.';
+      }
+    }
+
+    function printPressureForDate(date, weatherData) {
+      const dataForDate = weatherData.find(item => item.dt_txt.includes(date));
+      if (dataForDate) {
+        return `Pressure on ${date}: ${dataForDate.main.pressure}`;
+      } else {
+        return 'No data available for the selected date.';
+      }
+    }
+  </script>
+</body>
+
+</html>
